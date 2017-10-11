@@ -1,0 +1,19 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "storefront mysql",
+  "main": "bamazonCustomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanchita9/Bamazon.git"
+  },
+  "author": "sanchita",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sanchita9/Bamazon/issues"
+  },
+  "homepage": "https://github.com/sanchita9/Bamazon#readme"
+}
