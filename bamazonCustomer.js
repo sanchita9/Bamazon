@@ -3,7 +3,7 @@ var key = require('./keys.js');
 
 // node modules
 var mysql = require('mysql');
-var table = require('cli-table');
+var Table = require('cli-table');
 var inquirer = require('inquirer');
 
 // sql connection
@@ -11,8 +11,8 @@ var connection = mysql.createConnection({
 	host: "localhost",
 	port: 3306,
 	user: "root",
-	password: key,
-	database: "Bamazon"
+	password: key.password,
+	database: "bamazon"
 });
 
 // global variables
@@ -22,7 +22,7 @@ var totalCost = 0;
 // connect to mysql and then run the main function
 connection.connect(function(err) {
 	if (err) throw err;
-	console.log("connected ad id " + connection.threadId);
+	console.log("connected as id " + connection.threadId);
 	printItems(function(){
 		userSelectsItems();
 	});
@@ -31,7 +31,7 @@ connection.connect(function(err) {
 // function to print all items to the console, uses npm module cli-table
 function printItems(cb){
 	// new cli-table
-	var table = new table({
+	var table = new Table({
 		head: ['ID Number', 'Product', 'Department', 'Price', 'Quantity Available']
 	});
 	// get all rows from the Products table
@@ -39,12 +39,11 @@ function printItems(cb){
 		if (err) throw err;
 		// add all of the rows to the cli-table
 		for (var i = 0; i < res.length; i++) {
-			 table.push([res[i].ItemID, res[i].ProductName, res[i].DepartmentName, '$' + res[i].Price.toFixed(2), res[i].StockQuantity]);
+			 table.push([res[i].itemID, res[i].productName, res[i].departmentName, '$' + res[i].price.toFixed(2), res[i].stockQuantity]);
 		}
 		// log the table to the console
-		console.log(table.toString());
-		//callback the userSelectsItems function to prompt the user to add items to cart
-    cb();
+    console.log("This is the table from line 45", table);
+		
     });
   }
 
@@ -52,11 +51,11 @@ function printItems(cb){
 function userSelectsItem(){
 	var items = [];
 	//get all product names from the Products table
-  connection.query('SELECT ProductName FROM Products', function(err, res){
+  connection.query('SELECT productName FROM Products', function(err, res){
     if (err) throw err;
 	// get all product names into the things array
 	for (var i = 0; i < res.length; i++) {
-		things.push(res[i].ProductName)
+		things.push(res[i].productName)
 	}
 	// prompt the user to select items from the things array
 	inquirer.prompt([
@@ -64,7 +63,7 @@ function userSelectsItem(){
 		 name: 'choices',
 		 type: 'checkbox',
 		 message: 'Which products would you like to add to your cart? Press the space key to choose each Product and press enter when you are finished.',
-         choices: things
+         choices: items
       }
     ]).then(function(user){
       //alert the user if they did not select anything and run function again
@@ -105,14 +104,14 @@ function howManyItems(itemNames){
   var itemStock;
   var department;
   //query mysql to get the current stock, price, and department of the item
-  connection.query('SELECT StockQuantity, Price, DepartmentName FROM Products WHERE ?', {
-    ProductName: item
+  connection.query('SELECT stockQuantity, price, departmentName FROM Products WHERE ?', {
+    productName: item
   }, function(err, res){
     if(err) throw err;
     //set stock, price, and department in a variable
-    itemStock = res[0].StockQuantity;
-    itemCost = res[0].Price;
-    department = res[0].DepartmentName;
+    itemStock = res[0].stockQuantity;
+    itemCost = res[0].price;
+    department = res[0].departmentName;
   });
   //prompt the user to ask how many of the item they would like
   inquirer.prompt([
@@ -233,23 +232,23 @@ function updateDB(grandTotal){
       TotalSales: departmentTotalSales += departmentTransactionSale
     },
     {
-      DepartmentName: department
+      departmentName: department
     }], function(err){
       if(err) throw err;
     });
   });
   //query mysql to get the current StockQuantity of the item in case it has changed since the user has added the item to shoppingCart
   connection.query('SELECT StockQuantity from Products WHERE ?', {
-    ProductName: itemName
+    productName: itemName
   }, function(err, res){
-    var currentStock = res[0].StockQuantity;
+    var currentStock = res[0].stockQuantity;
     //update the StockQuantity in the database
     connection.query('UPDATE Products SET ? WHERE ?', [
     {
-      StockQuantity: currentStock -= userPurchase
+      stockQuantity: currentStock -= userPurchase
     },
     {
-      ProductName: itemName
+      productName: itemName
     }], function(err){
       if(err) throw err;
       //if there are still items in the shoppingCart run the function again

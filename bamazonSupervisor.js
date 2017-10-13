@@ -10,19 +10,19 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: key,
-    database: "Bamazon"
+    password: key.password,
+    database: "bamazon"
 });
 
 //connect to mysql and run executivePrompt function
 connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
-    executivePrompt();
+    supervisorPrompt();
 });
 
 //prompt the user to see what they would like to do
-function executivePrompt(){
+function supervisorPrompt(){
   inquirer.prompt([
   {
     name: 'choice',
@@ -53,9 +53,9 @@ function viewProductSalesByDepartment(){
     if(err) throw err;
     //add all of the rows to the cli-table
     for (var i = 0; i < res.length; i++) {
-      var id = res[i].DepartmentID;
-      var department = res[i].DepartmentName;
-      var overhead = res[i].OverHeadCosts;
+      var id = res[i].departmentID;
+      var department = res[i].departmentName;
+      var overhead = res[i].overHeadCosts;
       overhead = overhead.toFixed(2);
       var totalSales = res[i].TotalSales;
       totalSales = totalSales.toFixed(2);
@@ -64,9 +64,9 @@ function viewProductSalesByDepartment(){
       table.push([id, department, '$' + overhead, '$' + totalSales, '$' + TotalProfit]);
     }
     //log the table to the console
-    console.log(table.toString());
-    //run executivePrompt function to see what the user would like to do
-    executivePrompt();
+    console.log("This is coming from table line 67", table);
+    //run supervisorPrompt function to see what the user would like to do
+    // supervisorPrompt();
   });
 }
 
@@ -94,19 +94,19 @@ function addDepartment(){
     }
   ]).then(function(user){
       //create an object with all of the department properties
-      var OverHeadCosts = parseInt(user.overhead);
+      var overHeadCosts = parseInt(user.overhead);
       var department = {
-        DepartmentName: user.name,
-        OverHeadCosts: OverHeadCosts,
+        departmentName: user.name,
+        overHeadCosts: overHeadCosts,
         TotalSales: 0
       }
       //insert the new department into the mysql database
-      connection.query('INSERT INTO Departments SET ?', department,
+      connection.query('INSERT INTO Departments SET ?', departments,
       function(err){
         if(err) throw err;
-        console.log(department.DepartmentName + ' has been successfully added to the departments table.');
+        console.log(department.departmentName + ' has been successfully added to the departments table.');
         //run executivePrompt function again to see what the user would like to do
-        executivePrompt();
+        supervisorPrompt();
       });
     });
 }

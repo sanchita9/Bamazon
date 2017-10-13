@@ -8,8 +8,8 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: key,
-    database: "Bamazon"
+    password: key.password,
+    database: "bamazon"
 });
 
 //connect to mysql database and run the managerPrompt function
@@ -68,19 +68,19 @@ function viewProductsForSale(cb){
   connection.query('SELECT * FROM Products', function(err, res){
     if (err) throw err;
     for (var i = 0; i < res.length; i++) {
-      table.push([res[i].ItemID, res[i].ProductName, res[i].DepartmentName, '$' + res[i].Price.toFixed(2), res[i].StockQuantity]);
+      table.push([res[i].itemID, res[i].productName, res[i].departmentName, '$' + res[i].price.toFixed(2), res[i].stockQuantity]);
     }
     //log the table to the console
-    console.log(table.toString());
+    console.log( "This is table coming from 74", table);
     //callback the managerPrompt function to see if the user wants to do anything else
-    cb();
+    
     });
 }
 
 //function to view all items where StockQuantity is less than 5
 function viewLowInventory(cb){
   //query mysql database to get all rows where StockQuantity is less than 5
-  connection.query('SELECT * FROM Products WHERE StockQuantity < 5',
+  connection.query('SELECT * FROM Products WHERE stockQuantity < 5',
   function(err, res){
     if(err) throw err;
     //if no items StockQuantity is less than 5 alert the user and run the callback function
@@ -94,7 +94,7 @@ function viewLowInventory(cb){
         head: ['ID Number', 'Product', 'Department', 'Price', 'Quantity Available']
       });
       for (var i = 0; i < res.length; i++) {
-        table.push([res[i].ItemID, res[i].ProductName, res[i].DepartmentName, '$' + res[i].Price.toFixed(2), res[i].StockQuantity]);
+        table.push([res[i].itemID, res[i].productName, res[i].departmentName, '$' + res[i].price.toFixed(2), res[i].stockQuantity]);
       }
       //log the table to the console
       console.log(table.toString());
@@ -109,11 +109,11 @@ function viewLowInventory(cb){
 function addToInventory(){
   var items = [];
   //query mysql database to get all ProductNames
-  connection.query('SELECT ProductName FROM Products', function(err, res){
+  connection.query('SELECT productName FROM Products', function(err, res){
     if (err) throw err;
     //push all the product names to the items array
     for (var i = 0; i < res.length; i++) {
-      items.push(res[i].ProductName)
+      items.push(res[i].productName)
     }
     //ask the user which items from the items array they would like tp update inventory for
     inquirer.prompt([
@@ -143,11 +143,11 @@ function howMuchInventory(itemNames){
   var item = itemNames.shift();
   var itemStock;
   //query mysql to get the current stock quantity of the selected item
-  connection.query('SELECT StockQuantity FROM Products WHERE ?', {
-    ProductName: item
+  connection.query('SELECT stockQuantity FROM Products WHERE ?', {
+    productName: item
   }, function(err, res){
     if(err) throw err;
-    itemStock = res[0].StockQuantity;
+    itemStock = res[0].stockQuantity;
     itemStock = parseInt(itemStock)
   });
   //ask the user how many of the selected item to add to StockQuantity
@@ -172,10 +172,10 @@ function howMuchInventory(itemNames){
     //update the mysql database to reflect the new StockQuantity of the item
     connection.query('UPDATE Products SET ? WHERE ?', [
     {
-      StockQuantity: itemStock += amount
+      stockQuantity: itemStock += amount
     },
     {
-      ProductName: item
+      productName: item
     }], function(err){
       if(err) throw err;
     });
@@ -194,10 +194,10 @@ function howMuchInventory(itemNames){
 function addNewProduct(){
   var departments = [];
   //get all of the department names from Departments table
-  connection.query('SELECT DepartmentName FROM Departments', function(err, res){
+  connection.query('SELECT departments FROM Departments', function(err, res){
     if(err) throw err;
     for (var i = 0; i < res.length; i++) {
-      departments.push(res[i].DepartmentName);
+      departments.push(res[i].departmentName);
     }
   });
   //prompt the user for all of the information needed for the new product
@@ -226,16 +226,16 @@ function addNewProduct(){
   ]).then(function(user){
       //create an object with all of the items properties
       var item = {
-        ProductName: user.item,
-        DepartmentName: user.department,
-        Price: user.price,
-        StockQuantity: user.stock
+        productName: user.item,
+        departmentName: user.department,
+        price: user.price,
+        stockQuantity: user.stock
       }
       //inset the new item into the mysql database
       connection.query('INSERT INTO Products SET ?', item,
       function(err){
         if(err) throw err;
-        console.log(item.ProductName + ' has been successfully added to the inventory.');
+        console.log(item.productName + ' has been successfully added to the inventory.');
         //run managerPrompt function again to see what the user would like to do
         managerPrompt();
       });
