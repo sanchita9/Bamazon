@@ -14,6 +14,8 @@ opulate this database with around 10 different products. (i.e. Insert "mock" dat
 
 Then create a Node application called BamazonCustomer.js. Running this application will first display all of the items available for sale. Include the ids, names, and prices of products for sale.
 
+![alt text](https://github.com/sanchita9/Bamazon/blob/master/ReadMe%20Assets/mysqldb.1.JPG)
+
 SanchitaMohite@DESKTOP-JK82IHS MINGW64 ~/Desktop/bootcampClass/BootcampWeek12/Bamazon (master)
 $ node bamazonCustomer.js
 connected as id 17
